@@ -1,0 +1,2 @@
+WebGL is a new technology to me, so the whitepaper may be updated dramatically during each
+phase of development (graphical/physical/programmable layer). You can read it with <a href="./webgl-gameengine-whitepaper.pdf">this link</a> 

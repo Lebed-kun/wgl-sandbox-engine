@@ -1,5 +1,7 @@
 use wasm_bindgen::prelude::*;
 
+#[macro_use]
+mod utils;
 mod form;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global

@@ -7,8 +7,7 @@ use web_sys::{
 };
 
 mod constants {
-    pub const u_viewport_x_scale: &'static str = "u_viewport_x_scale";
-    pub const u_viewport_y_scale: &'static str = "u_viewport_y_scale";
+    pub const u_viewport: &'static str = "u_viewport";
     pub const u_position: &'static str = "u_position";
     pub const u_rotation: &'static str = "u_rotation";
     pub const u_scale: &'static str = "u_scale";
@@ -38,14 +37,14 @@ macro_rules! try_locate_uniform {
 }
 
 pub struct UniformLocations {
-    pub u_viewport_x_scale: WebGlUniformLocation,
-    pub u_viewport_y_scale: WebGlUniformLocation,
+    pub u_viewport: WebGlUniformLocation,
     pub u_position: WebGlUniformLocation,
     pub u_rotation: WebGlUniformLocation,
     pub u_scale: WebGlUniformLocation,
     pub u_color: WebGlUniformLocation,
 }
 
+/// Struct which stores WebGl program and locations of associated shaders
 pub struct Program {
     pub program: WebGlProgram,
     pub uniform_locations: UniformLocations,
@@ -123,16 +122,14 @@ impl Program {
     }
 
     fn retrieve_uniforms(gl: &WebGlRenderingContext, program: &WebGlProgram) -> Option<UniformLocations> {
-        let u_viewport_x_scale = try_locate_uniform!(gl, program, constants::u_viewport_x_scale);
-        let u_viewport_y_scale = try_locate_uniform!(gl, program, constants::u_viewport_y_scale);
+        let u_viewport = try_locate_uniform!(gl, program, constants::u_viewport);
         let u_position = try_locate_uniform!(gl, program, constants::u_position);
         let u_rotation = try_locate_uniform!(gl, program, constants::u_rotation);
         let u_scale = try_locate_uniform!(gl, program, constants::u_scale);
         let u_color = try_locate_uniform!(gl, program, constants::u_color);
 
         Some(UniformLocations {
-            u_viewport_x_scale,
-            u_viewport_y_scale,
+            u_viewport,
             u_position,
             u_rotation,
             u_scale,

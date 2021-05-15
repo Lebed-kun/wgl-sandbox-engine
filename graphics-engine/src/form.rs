@@ -3,13 +3,12 @@ use wasm_bindgen::JsCast;
 use web_sys::{
     WebGlBuffer, WebGlProgram, WebGlRenderingContext, WebGlShader, WebGlUniformLocation,
 };
-use js_sys::{Object};
+use js_sys::{Float32Array};
 use crate::types::{Vector4, Matrix4x4, DrawProps};
 use crate::program::{Program};
 
 struct Uniforms {
-    pub viewport_x_scale: f32,
-    pub viewport_y_scale: f32,
+    pub viewport: Vector4,
     pub position: Matrix4x4,
     pub rotation: Matrix4x4,
     pub scale: Matrix4x4,
@@ -31,19 +30,19 @@ mod constants {
 }
 
 // TODO: profile memory size for call stack optimization (?)
+
+/// Struct which stores WebGl level data for rendering shape
 pub struct Form<'a> {
     uniforms: Uniforms,
     vertex_buffer: WebGlBuffer,
-    vertex_data: Object,
-    vertex_data_length: i32,
+    vertex_data: Float32Array,
     program: &'a Program,
 }
 
 impl<'a> Form<'a> {
     pub fn init(
         gl: &WebGlRenderingContext,
-        vertex_data: Object,
-        vertex_data_length: i32,
+        vertex_data: &[f32],
         program: &'a Program
     ) -> Option<Self> {
         let vertex_buffer = try_unwrap!(
@@ -52,27 +51,28 @@ impl<'a> Form<'a> {
             "Unable to find location of attribute \"a_vertex\""
         );
 
-        Some(Self {
-            uniforms: Uniforms {
-                viewport_x_scale: 0.0,
-                viewport_y_scale: 0.0,
-                position: constants::default_matrix4x4,
-                rotation: constants::default_matrix4x4,
-                scale: constants::default_matrix4x4,
-                color: constants::default_vector4
-            },
-            vertex_buffer,
-            vertex_data,
-            vertex_data_length,
-            program
-        })
+        unsafe {
+            let vertex_array = Float32Array::view(vertex_data);
+
+            Some(Self {
+                uniforms: Uniforms {
+                    viewport: constants::default_vector4,
+                    position: constants::default_matrix4x4,
+                    rotation: constants::default_matrix4x4,
+                    scale: constants::default_matrix4x4,
+                    color: constants::default_vector4
+                },
+                vertex_buffer,
+                vertex_data: vertex_array,
+                program
+            })
+        }
     }
 
     pub fn draw(
         &mut self, 
         gl: &WebGlRenderingContext,
-        viewport_x_scale: f32,
-        viewport_y_scale: f32,
+        viewport: Vector4,
         draw_props: &DrawProps
     ) {
         gl.use_program(Some(&self.program.program));
@@ -91,6 +91,7 @@ impl<'a> Form<'a> {
             WebGlRenderingContext::ARRAY_BUFFER,
             Some(&self.vertex_buffer)
         );
+
         gl.buffer_data_with_array_buffer_view(
             WebGlRenderingContext::ARRAY_BUFFER,
             &self.vertex_data,
@@ -98,15 +99,10 @@ impl<'a> Form<'a> {
         );
 
         // Setup uniform data
-        self.uniforms.viewport_x_scale = viewport_x_scale;
-        self.uniforms.viewport_y_scale = viewport_y_scale;
-        gl.uniform1f(
-            Some(&self.program.uniform_locations.u_viewport_x_scale),
-            self.uniforms.viewport_x_scale
-        );
-        gl.uniform1f(
-            Some(&self.program.uniform_locations.u_viewport_y_scale),
-            self.uniforms.viewport_y_scale
+        self.uniforms.viewport = viewport;
+        gl.uniform4fv_with_f32_array(
+            Some(&self.program.uniform_locations.u_viewport),
+            &self.uniforms.viewport
         );
 
         self.uniforms.position[(0 << 2) + 3] = draw_props.position.x;
@@ -146,7 +142,7 @@ impl<'a> Form<'a> {
         gl.draw_arrays(
             WebGlRenderingContext::TRIANGLES,
             0,
-            self.vertex_data_length / 2
+            (self.vertex_data.length() / 2) as i32
         );
     }
 }

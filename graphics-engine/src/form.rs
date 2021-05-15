@@ -9,6 +9,11 @@ struct Uniform<T> {
     pub value: T,
 }
 
+struct Attribute<T> {
+    pub location: i32,
+    pub value: T,
+}
+
 type Vector4 = [f32; 4];
 type Matrix4x4 = [Vector4; 4];
 
@@ -30,6 +35,8 @@ mod constants {
     pub const u_rotation: &'static str = "u_rotation";
     pub const u_scale: &'static str = "u_scale";
     pub const u_color: &'static str = "u_color";
+
+    pub const a_vertex: &'static str = "a_vertex";
 
     pub const default_matrix4x4: Matrix4x4 = [
         [1.0, 0.0, 0.0, 0.0],
@@ -65,6 +72,7 @@ macro_rules! try_locate_uniform {
 // TODO: profile memory size for call stack optimization (?)
 pub struct Form {
     uniforms: Uniforms,
+    vertex_attribute: Attribute<Vector4>,
     vertex_buffer: WebGlBuffer,
     vertex_data: Vec<f32>,
 }
@@ -150,28 +158,69 @@ impl Form {
         Some(Uniforms {
             viewport_x_scale: Uniform {
                 location: u_viewport_x_scale,
-                value: 0.0
+                value: 0.0,
             },
             viewport_y_scale: Uniform {
                 location: u_viewport_y_scale,
-                value: 0.0
+                value: 0.0,
             },
             position: Uniform {
                 location: u_position,
-                value: constants::default_matrix4x4
+                value: constants::default_matrix4x4,
             },
             rotation: Uniform {
                 location: u_rotation,
-                value: constants::default_matrix4x4
+                value: constants::default_matrix4x4,
             },
             scale: Uniform {
                 location: u_scale,
-                value: constants::default_matrix4x4
+                value: constants::default_matrix4x4,
             },
             color: Uniform {
                 location: u_color,
+                value: constants::default_vector4,
+            },
+        })
+    }
+
+    pub fn init(
+        gl: &WebGlRenderingContext,
+        vertex_shader_src: &str,
+        fragment_shader_src: &str,
+        vertex_data: Vec<f32>,
+    ) -> Option<Self> {
+        let program = try_unwrap!(
+            @dev;
+            Self::init_program(gl, vertex_shader_src, fragment_shader_src),
+            "Unable to initialize program"
+        );
+
+        let vertex_attribute_location = try_unwrap!(
+            @dev;
+            Some(gl.get_attrib_location(&program, constants::a_vertex)),
+            "Unable to find location of attribute \"a_vertex\"",
+            |v| *v >= 0
+        );
+        let vertex_buffer = try_unwrap!(
+            @dev;
+            gl.create_buffer(),
+            "Unable to find location of attribute \"a_vertex\""
+        );
+
+        let uniforms = try_unwrap!(
+            @dev;
+            Self::retrieve_uniforms(gl, &program),
+            "Unable to retrieve uniforms"
+        );
+
+        Some(Self {
+            uniforms,
+            vertex_attribute: Attribute {
+                location: vertex_attribute_location,
                 value: constants::default_vector4
-            }
+            },
+            vertex_buffer,
+            vertex_data
         })
     }
 }

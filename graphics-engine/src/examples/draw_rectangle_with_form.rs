@@ -25,6 +25,11 @@ const example_vertex_shader: &'static str = "
 
 const example_fragment_shader: &'static str = "
     precision mediump float;
+
+    uniform vec4 u_viewport;
+    uniform mat4 u_position;
+    uniform mat4 u_rotation;
+    uniform mat4 u_scale;
     uniform vec4 u_color;
 
     void main() {

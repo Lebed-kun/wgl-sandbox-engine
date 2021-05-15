@@ -1,9 +1,18 @@
+use wasm_bindgen::prelude::*;
+use web_sys::console;
+
+macro_rules! log {
+    ( $( $t:tt )* ) => {
+        web_sys::console::log_1(&format!( $( $t )* ).into());
+    };
+}
+
 macro_rules! try_unwrap {
     (@dev; $ex:expr, $error_msg:expr $(, $cond:expr)?) => {
         {
             let val = $ex;
             if val.is_none() {
-                println!(
+                log!(
                     "Error in module \"{}\" in line {}: \n\"{}\"",
                     file!(),
                     line!(),
@@ -15,7 +24,7 @@ macro_rules! try_unwrap {
             $(
                 let val = val.filter($cond);
                 if val.is_none() {
-                    println!(
+                    log!(
                         "Error in module \"{}\" in line {}: \n\"{}\"",
                         file!(),
                         line!(),

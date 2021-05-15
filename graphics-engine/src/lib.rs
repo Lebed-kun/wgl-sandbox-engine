@@ -15,11 +15,6 @@ pub mod examples;
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
-extern {
-    fn alert(s: &str);
-}
-
-#[wasm_bindgen]
-pub fn greet() {
-    alert("Hello, graphics-engine!");
+pub fn example() {
+    examples::draw_rectangle_with_form::example();
 }

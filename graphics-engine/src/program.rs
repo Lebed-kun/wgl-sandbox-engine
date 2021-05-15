@@ -95,8 +95,8 @@ impl Program {
             @dev;
             Self::compile_shader(
                 gl,
-                vertex_shader_src,
-                WebGlRenderingContext::VERTEX_SHADER
+                fragment_shader_src,
+                WebGlRenderingContext::FRAGMENT_SHADER
             ),
             "Unable to compile fragment shader"
         );

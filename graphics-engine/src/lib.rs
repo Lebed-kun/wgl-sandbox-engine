@@ -3,7 +3,8 @@ use wasm_bindgen::prelude::*;
 mod types;
 #[macro_use]
 mod utils;
-mod form;
+pub mod program;
+pub mod form;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.

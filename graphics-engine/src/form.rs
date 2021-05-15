@@ -3,6 +3,8 @@ use wasm_bindgen::JsCast;
 use web_sys::{
     WebGlBuffer, WebGlProgram, WebGlRenderingContext, WebGlShader, WebGlUniformLocation,
 };
+use js_sys::{Object};
+use crate::types::{Vector4, Matrix4x4, DrawProps};
 
 struct Uniform<T> {
     pub location: WebGlUniformLocation,
@@ -10,12 +12,9 @@ struct Uniform<T> {
 }
 
 struct Attribute<T> {
-    pub location: i32,
+    pub location: u32,
     pub value: T,
 }
-
-type Vector4 = [f32; 4];
-type Matrix4x4 = [Vector4; 4];
 
 struct Uniforms {
     pub viewport_x_scale: Uniform<f32>,
@@ -39,13 +38,14 @@ mod constants {
     pub const a_vertex: &'static str = "a_vertex";
 
     pub const default_matrix4x4: Matrix4x4 = [
-        [1.0, 0.0, 0.0, 0.0],
-        [0.0, 1.0, 0.0, 0.0],
-        [0.0, 0.0, 1.0, 0.0],
-        [0.0, 0.0, 0.0, 1.0],
+        1.0, 0.0, 0.0, 0.0,
+        0.0, 1.0, 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, 0.0, 1.0,
     ];
-
     pub const default_vector4: Vector4 = [0.0, 0.0, 0.0, 0.0];
+
+    pub const vertex_size: i32 = 4;
 }
 
 fn is_valid_u_location(v: &WebGlUniformLocation) -> bool {
@@ -74,7 +74,9 @@ pub struct Form {
     uniforms: Uniforms,
     vertex_attribute: Attribute<Vector4>,
     vertex_buffer: WebGlBuffer,
-    vertex_data: Vec<f32>,
+    vertex_data: Object,
+    vertex_data_length: i32,
+    program: WebGlProgram,
 }
 
 impl Form {
@@ -187,7 +189,8 @@ impl Form {
         gl: &WebGlRenderingContext,
         vertex_shader_src: &str,
         fragment_shader_src: &str,
-        vertex_data: Vec<f32>,
+        vertex_data: Object,
+        vertex_data_length: i32
     ) -> Option<Self> {
         let program = try_unwrap!(
             @dev;
@@ -216,11 +219,95 @@ impl Form {
         Some(Self {
             uniforms,
             vertex_attribute: Attribute {
-                location: vertex_attribute_location,
+                location: vertex_attribute_location as u32,
                 value: constants::default_vector4
             },
             vertex_buffer,
-            vertex_data
+            vertex_data,
+            vertex_data_length,
+            program
         })
+    }
+
+    pub fn draw(
+        &mut self, 
+        gl: &WebGlRenderingContext,
+        viewport_x_scale: f32,
+        viewport_y_scale: f32,
+        draw_props: &DrawProps
+    ) {
+        gl.use_program(Some(&self.program));
+
+        // Setup vertex data
+        gl.enable_vertex_attrib_array(self.vertex_attribute.location);
+        gl.vertex_attrib_pointer_with_f64(
+            self.vertex_attribute.location,
+            constants::vertex_size,
+            WebGlRenderingContext::FLOAT,
+            false,
+            0,
+            0.0
+        );
+        gl.bind_buffer(
+            WebGlRenderingContext::ARRAY_BUFFER,
+            Some(&self.vertex_buffer)
+        );
+        gl.buffer_data_with_array_buffer_view(
+            WebGlRenderingContext::ARRAY_BUFFER,
+            &self.vertex_data,
+            WebGlRenderingContext::STATIC_DRAW
+        );
+
+        // Setup uniform data
+        self.uniforms.viewport_x_scale.value = viewport_x_scale;
+        self.uniforms.viewport_y_scale.value = viewport_y_scale;
+        gl.uniform1f(
+            Some(&self.uniforms.viewport_x_scale.location),
+            self.uniforms.viewport_x_scale.value
+        );
+        gl.uniform1f(
+            Some(&self.uniforms.viewport_y_scale.location),
+            self.uniforms.viewport_y_scale.value
+        );
+
+        self.uniforms.position.value[(0 << 2) + 3] = draw_props.position.x;
+        self.uniforms.position.value[(1 << 2) + 3] = draw_props.position.y;
+        gl.uniform_matrix4fv_with_f32_array(
+            Some(&self.uniforms.position.location),
+            false,
+            &self.uniforms.position.value
+        );
+        
+        let cos_angle = draw_props.rotation.cos();
+        let sin_angle = draw_props.rotation.sin();
+        self.uniforms.rotation.value[(0 << 2) + 0] = cos_angle;
+        self.uniforms.rotation.value[(0 << 2) + 1] = -sin_angle;
+        self.uniforms.rotation.value[(1 << 2) + 0] = sin_angle;
+        self.uniforms.rotation.value[(1 << 2) + 1] = cos_angle;
+        gl.uniform_matrix4fv_with_f32_array(
+            Some(&self.uniforms.rotation.location),
+            false,
+            &self.uniforms.rotation.value
+        );
+
+        self.uniforms.scale.value[(0 << 2) + 0] = draw_props.scale.x;
+        self.uniforms.scale.value[(1 << 2) + 1] = draw_props.scale.y;
+        gl.uniform_matrix4fv_with_f32_array(
+            Some(&self.uniforms.scale.location),
+            false,
+            &self.uniforms.scale.value
+        );
+
+        self.uniforms.color.value = draw_props.color;
+        gl.uniform4fv_with_f32_array(
+            Some(&self.uniforms.color.location),
+            &self.uniforms.color.value
+        );
+
+        gl.draw_arrays(
+            WebGlRenderingContext::TRIANGLES,
+            0,
+            self.vertex_data_length / 2
+        );
     }
 }

@@ -1,5 +1,6 @@
 use wasm_bindgen::prelude::*;
 
+mod types;
 #[macro_use]
 mod utils;
 mod form;

@@ -1,2 +1,1 @@
-pub mod draw_rectangle_with_form;
-pub mod draw_rectangle_with_translation;
+pub mod draw_rectangles_with_form;

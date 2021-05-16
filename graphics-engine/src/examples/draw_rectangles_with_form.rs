@@ -58,20 +58,31 @@ pub fn example() -> Result<(), JsValue> {
         0.0, 0.0, 1.0, 1.0, 200.0, 0.0, 1.0, 1.0, 0.0, 200.0, 1.0, 1.0, // Triangle 1
         200.0, 0.0, 1.0, 1.0, 0.0, 200.0, 1.0, 1.0, 200.0, 200.0, 1.0, 1.0, // Triangle 2
     ];
-    let mut form = Form::init(&context, &vertex_data, &program).unwrap();
 
-    /*
-    context.clear_color(0.0, 0.0, 0.0, 0.0);
-    context.clear(WebGlRenderingContext::COLOR_BUFFER_BIT | WebGlRenderingContext::DEPTH_BUFFER_BIT);
-    */
 
-    let draw_props = DrawProps {
+    let mut form1 = Form::init(&context, &vertex_data, &program).unwrap();
+    let draw_props1 = DrawProps {
         position: XYTuple { x: 0.0, y: 0.0 },
         rotation: 0.0,
         scale: XYTuple { x: 1.0, y: 1.0 },
         color: [0.7, 0.33, 0.1, 1.0],
     };
-    form.draw(&context, [800.0, 400.0, 1.0, 1.0], &draw_props);
+
+    let mut form2 = Form::init(&context, &vertex_data, &program).unwrap();
+    let draw_props2 = DrawProps {
+        position: XYTuple { x: 300.0, y: 50.0 },
+        rotation: std::f32::consts::PI / 4.0,
+        scale: XYTuple { x: 1.5, y: 1.0 },
+        color: [0.0, 0.33, 0.1, 1.0],
+    };
+
+    context.clear_color(0.0, 0.0, 0.0, 0.0);
+    context.clear(WebGlRenderingContext::COLOR_BUFFER_BIT | WebGlRenderingContext::DEPTH_BUFFER_BIT);
+    form1.draw(&context, [800.0, 400.0, 1.0, 1.0], &draw_props1);
+    form2.draw(&context, [800.0, 400.0, 1.0, 1.0], &draw_props2);
+
+    
+
 
     Ok(())
 }

@@ -1,7 +1,7 @@
 use crate::types::{DrawProps, Matrix4x4, Vector4};
-use js_sys::Object;
+use js_sys::{Object, Number};
 use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
+use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{
     WebGlBuffer, WebGlProgram, WebGlRenderingContext, WebGlShader, WebGlUniformLocation,
 };
@@ -15,11 +15,6 @@ mod constants {
     pub const a_vertex: &'static str = "a_vertex";
 }
 
-fn is_valid_u_location(v: &WebGlUniformLocation) -> bool {
-    let num = v.as_f64();
-    num.is_some() && num.unwrap() >= 0.0
-}
-
 macro_rules! try_locate_uniform {
     ($gl:expr, $program:expr, $u_name:expr) => {
         {
@@ -29,8 +24,7 @@ macro_rules! try_locate_uniform {
                 format!(
                     "Unable to get uniform location of parameter \"{}\"",
                     $u_name
-                ),
-                is_valid_u_location
+                )
             )
         }
     };

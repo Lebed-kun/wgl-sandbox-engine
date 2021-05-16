@@ -78,7 +78,15 @@ impl<'a> Form<'a> {
         gl.use_program(Some(&self.program.program));
 
         // Setup vertex data
-        gl.enable_vertex_attrib_array(self.program.a_vertex_location);
+        gl.bind_buffer(
+            WebGlRenderingContext::ARRAY_BUFFER,
+            Some(&self.vertex_buffer)
+        );
+        gl.buffer_data_with_array_buffer_view(
+            WebGlRenderingContext::ARRAY_BUFFER,
+            &self.vertex_data,
+            WebGlRenderingContext::STATIC_DRAW
+        );
         gl.vertex_attrib_pointer_with_f64(
             self.program.a_vertex_location,
             constants::vertex_size,
@@ -87,16 +95,7 @@ impl<'a> Form<'a> {
             0,
             0.0
         );
-        gl.bind_buffer(
-            WebGlRenderingContext::ARRAY_BUFFER,
-            Some(&self.vertex_buffer)
-        );
-
-        gl.buffer_data_with_array_buffer_view(
-            WebGlRenderingContext::ARRAY_BUFFER,
-            &self.vertex_data,
-            WebGlRenderingContext::STATIC_DRAW
-        );
+        gl.enable_vertex_attrib_array(self.program.a_vertex_location);
 
         // Setup uniform data
         self.uniforms.viewport = viewport;
@@ -105,8 +104,9 @@ impl<'a> Form<'a> {
             &self.uniforms.viewport
         );
 
-        self.uniforms.position[(0 << 2) + 3] = draw_props.position.x;
-        self.uniforms.position[(1 << 2) + 3] = draw_props.position.y;
+        self.uniforms.position[(3 << 2) + 1] = draw_props.position.x;
+        self.uniforms.position[(3 << 2) + 2] = draw_props.position.y;
+        log!("Position matx => {:?}", self.uniforms.position);
         gl.uniform_matrix4fv_with_f32_array(
             Some(&self.program.uniform_locations.u_position),
             false,
@@ -116,9 +116,10 @@ impl<'a> Form<'a> {
         let cos_angle = draw_props.rotation.cos();
         let sin_angle = draw_props.rotation.sin();
         self.uniforms.rotation[(0 << 2) + 0] = cos_angle;
-        self.uniforms.rotation[(0 << 2) + 1] = -sin_angle;
-        self.uniforms.rotation[(1 << 2) + 0] = sin_angle;
+        self.uniforms.rotation[(0 << 2) + 1] = sin_angle;
+        self.uniforms.rotation[(1 << 2) + 0] = -sin_angle;
         self.uniforms.rotation[(1 << 2) + 1] = cos_angle;
+        log!("Rotation matx => {:?}", self.uniforms.rotation);
         gl.uniform_matrix4fv_with_f32_array(
             Some(&self.program.uniform_locations.u_rotation),
             false,
@@ -127,6 +128,7 @@ impl<'a> Form<'a> {
 
         self.uniforms.scale[(0 << 2) + 0] = draw_props.scale.x;
         self.uniforms.scale[(1 << 2) + 1] = draw_props.scale.y;
+        log!("Scale matx => {:?}", self.uniforms.scale);
         gl.uniform_matrix4fv_with_f32_array(
             Some(&self.program.uniform_locations.u_scale),
             false,
@@ -142,7 +144,7 @@ impl<'a> Form<'a> {
         gl.draw_arrays(
             WebGlRenderingContext::TRIANGLES,
             0,
-            (self.vertex_data.length() / 2) as i32
+            (self.vertex_data.length() as i32 / constants::vertex_size) as i32
         );
     }
 }

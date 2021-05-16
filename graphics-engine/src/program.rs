@@ -64,6 +64,10 @@ impl Program {
             .get_shader_parameter(&shader, WebGlRenderingContext::COMPILE_STATUS)
             .is_falsy()
         {
+            let info = gl.get_shader_info_log(&shader);
+            if info.is_some() {
+                log!("{:?}", info.unwrap());
+            }
             return None;
         }
 

@@ -78,6 +78,7 @@ impl<'a> Form<'a> {
         gl.use_program(Some(&self.program.program));
 
         // Setup vertex data
+        gl.enable_vertex_attrib_array(self.program.a_vertex_location);
         gl.bind_buffer(
             WebGlRenderingContext::ARRAY_BUFFER,
             Some(&self.vertex_buffer)
@@ -95,7 +96,6 @@ impl<'a> Form<'a> {
             0,
             0.0
         );
-        gl.enable_vertex_attrib_array(self.program.a_vertex_location);
 
         // Setup uniform data
         self.uniforms.viewport = viewport;
@@ -104,8 +104,8 @@ impl<'a> Form<'a> {
             &self.uniforms.viewport
         );
 
-        self.uniforms.position[(3 << 2) + 1] = draw_props.position.x;
-        self.uniforms.position[(3 << 2) + 2] = draw_props.position.y;
+        self.uniforms.position[(3 << 2) + 0] = draw_props.position.x;
+        self.uniforms.position[(3 << 2) + 1] = draw_props.position.y;
         log!("Position matx => {:?}", self.uniforms.position);
         gl.uniform_matrix4fv_with_f32_array(
             Some(&self.program.uniform_locations.u_position),

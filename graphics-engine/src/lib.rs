@@ -17,4 +17,5 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 #[wasm_bindgen]
 pub fn example() {
     examples::draw_rectangle_with_form::example();
+    examples::draw_rectangle_with_translation::example();
 }

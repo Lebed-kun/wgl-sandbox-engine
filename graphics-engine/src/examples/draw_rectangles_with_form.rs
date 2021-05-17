@@ -76,13 +76,13 @@ pub fn example() -> Result<(), JsValue> {
         color: [0.0, 0.33, 0.1, 1.0],
     };
 
+    form1.prepare([800.0, 400.0, 1.0, 1.0], &draw_props1);
+    form2.prepare([800.0, 400.0, 1.0, 1.0], &draw_props2);
+
     context.clear_color(0.0, 0.0, 0.0, 0.0);
     context.clear(WebGlRenderingContext::COLOR_BUFFER_BIT | WebGlRenderingContext::DEPTH_BUFFER_BIT);
-    form1.draw(&context, [800.0, 400.0, 1.0, 1.0], &draw_props1);
-    form2.draw(&context, [800.0, 400.0, 1.0, 1.0], &draw_props2);
-
-    
-
+    form1.draw(&context);
+    form2.draw(&context);
 
     Ok(())
 }

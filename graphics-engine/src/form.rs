@@ -69,11 +69,32 @@ impl<'a> Form<'a> {
         }
     }
 
-    pub fn draw(
-        &mut self, 
-        gl: &WebGlRenderingContext,
+    pub fn prepare(
+        &mut self,
         viewport: Vector4,
         draw_props: &DrawProps
+    ) {
+        self.uniforms.viewport = viewport;
+
+        self.uniforms.position[(3 << 2) + 0] = draw_props.position.x;
+        self.uniforms.position[(3 << 2) + 1] = draw_props.position.y;
+        
+        let cos_angle = draw_props.rotation.cos();
+        let sin_angle = draw_props.rotation.sin();
+        self.uniforms.rotation[(0 << 2) + 0] = cos_angle;
+        self.uniforms.rotation[(0 << 2) + 1] = sin_angle;
+        self.uniforms.rotation[(1 << 2) + 0] = -sin_angle;
+        self.uniforms.rotation[(1 << 2) + 1] = cos_angle;
+
+        self.uniforms.scale[(0 << 2) + 0] = draw_props.scale.x;
+        self.uniforms.scale[(1 << 2) + 1] = draw_props.scale.y;
+
+        self.uniforms.color = draw_props.color;
+    }
+
+    pub fn draw(
+        &self, 
+        gl: &WebGlRenderingContext,
     ) {
         gl.use_program(Some(&self.program.program));
 
@@ -98,44 +119,30 @@ impl<'a> Form<'a> {
         );
 
         // Setup uniform data
-        self.uniforms.viewport = viewport;
+        
         gl.uniform4fv_with_f32_array(
             Some(&self.program.uniform_locations.u_viewport),
             &self.uniforms.viewport
         );
 
-        self.uniforms.position[(3 << 2) + 0] = draw_props.position.x;
-        self.uniforms.position[(3 << 2) + 1] = draw_props.position.y;
-        log!("Position matx => {:?}", self.uniforms.position);
         gl.uniform_matrix4fv_with_f32_array(
             Some(&self.program.uniform_locations.u_position),
             false,
             &self.uniforms.position
         );
         
-        let cos_angle = draw_props.rotation.cos();
-        let sin_angle = draw_props.rotation.sin();
-        self.uniforms.rotation[(0 << 2) + 0] = cos_angle;
-        self.uniforms.rotation[(0 << 2) + 1] = sin_angle;
-        self.uniforms.rotation[(1 << 2) + 0] = -sin_angle;
-        self.uniforms.rotation[(1 << 2) + 1] = cos_angle;
-        log!("Rotation matx => {:?}", self.uniforms.rotation);
         gl.uniform_matrix4fv_with_f32_array(
             Some(&self.program.uniform_locations.u_rotation),
             false,
             &self.uniforms.rotation
         );
 
-        self.uniforms.scale[(0 << 2) + 0] = draw_props.scale.x;
-        self.uniforms.scale[(1 << 2) + 1] = draw_props.scale.y;
-        log!("Scale matx => {:?}", self.uniforms.scale);
         gl.uniform_matrix4fv_with_f32_array(
             Some(&self.program.uniform_locations.u_scale),
             false,
             &self.uniforms.scale
         );
 
-        self.uniforms.color = draw_props.color;
         gl.uniform4fv_with_f32_array(
             Some(&self.program.uniform_locations.u_color),
             &self.uniforms.color

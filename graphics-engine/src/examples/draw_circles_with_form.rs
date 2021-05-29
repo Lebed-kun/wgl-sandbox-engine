@@ -48,11 +48,11 @@ fn gen_vertex_data() -> Box<[f32]> {
         x: 0.0,
         y: 0.0,
     };
-    let radius: f32 = 100.0;
+    const radius: f32 = 200.0;
 
-    let steps = (max_viewport_size / 8.0) as i32;
+    const steps: i32 = (radius * 2.0 * std::f32::consts::PI / 8.0) as i32;
     let mut buffer_data: Box<[f32]> = Box::new(
-        [0.0; (max_viewport_size / 2.0 * 4.0 * 3.0) as usize]
+        [0.0; ((steps as f32) * 4.0 * 3.0) as usize]
     );
 
     let mut i = 0_usize;

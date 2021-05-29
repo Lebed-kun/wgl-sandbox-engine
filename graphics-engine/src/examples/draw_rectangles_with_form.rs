@@ -58,30 +58,35 @@ pub fn example() -> Result<(), JsValue> {
     let program = Program::init(&context, example_vertex_shader, example_fragment_shader);
     let program = program.unwrap();
 
+    let px_projection = 1.0 as f32;
     let vertex_data: [f32; 24] = [
-        0.0, 0.0, 1.0, 1.0, 200.0, 0.0, 1.0, 1.0, 0.0, 200.0, 1.0, 1.0, // Triangle 1
-        200.0, 0.0, 1.0, 1.0, 0.0, 200.0, 1.0, 1.0, 200.0, 200.0, 1.0, 1.0, // Triangle 2
+        -px_projection, -px_projection, 1.0, 1.0, 
+        px_projection, -px_projection, 1.0, 1.0, 
+        -px_projection, px_projection, 1.0, 1.0, // Triangle 1
+        px_projection, -px_projection, 1.0, 1.0, 
+        -px_projection, px_projection, 1.0, 1.0, 
+        px_projection, px_projection, 1.0, 1.0, // Triangle 2
     ];
 
 
     let mut form1 = Form::init(&context, &vertex_data, &program).unwrap();
     let draw_props1 = DrawProps {
-        position: XYTuple { x: 0.0, y: 0.0 },
+        position: XYTuple { x: 100.0, y: 100.0 },
         rotation: 0.0,
-        scale: XYTuple { x: 1.0, y: 1.0 },
+        scale: XYTuple { x: 100.0, y: 100.0 },
         color: [0.7, 0.33, 0.1, 1.0],
     };
 
     let mut form2 = Form::init(&context, &vertex_data, &program).unwrap();
     let draw_props2 = DrawProps {
-        position: XYTuple { x: 300.0, y: 50.0 },
+        position: XYTuple { x: 400.0, y: 400.0 },
         rotation: std::f32::consts::PI / 4.0,
-        scale: XYTuple { x: 1.5, y: 1.0 },
+        scale: XYTuple { x: 150.0, y: 100.0 },
         color: [0.0, 0.33, 0.1, 1.0],
     };
 
-    form1.prepare([800.0, 400.0, 1.0, 1.0], &draw_props1);
-    form2.prepare([800.0, 400.0, 1.0, 1.0], &draw_props2);
+    form1.prepare([800.0, 800.0, 1.0, 1.0], &draw_props1);
+    form2.prepare([800.0, 800.0, 1.0, 1.0], &draw_props2);
 
     context.clear_color(0.0, 0.0, 0.0, 0.0);
     context.clear(WebGlRenderingContext::COLOR_BUFFER_BIT | WebGlRenderingContext::DEPTH_BUFFER_BIT);

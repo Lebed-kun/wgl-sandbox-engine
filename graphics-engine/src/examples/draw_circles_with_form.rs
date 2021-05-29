@@ -48,9 +48,9 @@ fn gen_vertex_data() -> Box<[f32]> {
         x: 0.0,
         y: 0.0,
     };
-    const radius: f32 = 400.0;
-
-    const steps: i32 = (radius * 2.0 * std::f32::consts::PI / 8.0) as i32;
+    const max_radius: f32 = 1000.0;
+    const steps: i32 = (max_radius * 2.0 * std::f32::consts::PI / 8.0) as i32;
+    
     let mut buffer_data: Box<[f32]> = Box::new(
         [0.0; ((steps as f32) * 4.0 * 3.0) as usize]
     );
@@ -58,6 +58,7 @@ fn gen_vertex_data() -> Box<[f32]> {
     let mut i = 0_usize;
     let angle_step = 2.0 * std::f32::consts::PI / (steps as f32);
     let mut angle: f32 = 0.0;
+    let radius = 1.0;
     for _ in 0..steps {
         // origin vertex
         buffer_data[i] = origin.x;
@@ -106,9 +107,9 @@ pub fn example() -> Result<(), JsValue> {
 
     let mut form1 = Form::init(&context, vertex_data.as_ref(), &program).unwrap();
     let draw_props1 = DrawProps {
-        position: XYTuple { x: 100.0, y: 100.0 },
+        position: XYTuple { x: 200.0, y: 200.0 },
         rotation: 0.0,
-        scale: XYTuple { x: 0.025, y: 0.025 },
+        scale: XYTuple { x: 200.0, y: 200.0 },
         color: [0.7, 0.33, 0.1, 1.0],
     };
 
@@ -116,7 +117,7 @@ pub fn example() -> Result<(), JsValue> {
     let draw_props2 = DrawProps {
         position: XYTuple { x: 400.0, y: 400.0 },
         rotation: std::f32::consts::PI / 4.0,
-        scale: XYTuple { x: 0.0375, y: 0.025 },
+        scale: XYTuple { x: 200.0, y: 100.0 },
         color: [0.0, 0.33, 0.1, 1.0],
     };
 

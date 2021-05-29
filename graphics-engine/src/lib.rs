@@ -5,6 +5,7 @@ mod types;
 mod utils;
 pub mod program;
 pub mod form;
+pub mod shape;
 
 pub mod examples;
 
@@ -16,5 +17,6 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
 pub fn example() {
-    examples::draw_rectangles_with_form::example();
+    // examples::draw_rectangles_with_form::example();
+    examples::draw_circles_with_form::example();
 }

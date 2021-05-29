@@ -3,6 +3,7 @@ use wasm_bindgen::JsCast;
 
 use crate::{form::Form, program::Program, types::DrawProps, types::XYTuple};
 use web_sys::{window, HtmlCanvasElement, WebGlRenderingContext};
+use std::rc::Rc;
 
 const example_vertex_shader: &'static str = "
     //VERTEX SHADER
@@ -40,6 +41,49 @@ const example_fragment_shader: &'static str = "
     }
 ";
 
+fn gen_vertex_data() -> Box<[f32]> {
+    const max_viewport_size: f32 = 800.0;
+    const min_viewport_size: f32 = 800.0;
+    let origin = XYTuple {
+        x: 0.0,
+        y: 0.0,
+    };
+    let radius: f32 = 100.0;
+
+    let steps = (max_viewport_size / 8.0) as i32;
+    let mut buffer_data: Box<[f32]> = Box::new(
+        [0.0; (max_viewport_size / 2.0 * 4.0 * 3.0) as usize]
+    );
+
+    let mut i = 0_usize;
+    let angle_step = 2.0 * std::f32::consts::PI / (steps as f32);
+    let mut angle: f32 = 0.0;
+    for _ in 0..steps {
+        // origin vertex
+        buffer_data[i] = origin.x;
+        buffer_data[i + 1] = origin.y;
+        buffer_data[i + 2] = 1.0;
+        buffer_data[i + 3] = 1.0;
+
+        // current vertex
+        buffer_data[i + 4] = origin.x + radius * angle.cos();
+        buffer_data[i + 5] = origin.y - radius * angle.sin();
+        buffer_data[i + 6] = 1.0;
+        buffer_data[i + 7] = 1.0;
+
+        // next vertex
+        angle += angle_step;
+        buffer_data[i + 8] = origin.x + radius * angle.cos();
+        buffer_data[i + 9] = origin.y - radius * angle.sin();
+        buffer_data[i + 10] = 1.0;
+        buffer_data[i + 11] = 1.0;
+
+        i += 12;
+    }
+
+    buffer_data
+}
+
 pub fn example() -> Result<(), JsValue> {
     let canvas = window()
         .unwrap()
@@ -58,30 +102,26 @@ pub fn example() -> Result<(), JsValue> {
     let program = Program::init(&context, example_vertex_shader, example_fragment_shader);
     let program = program.unwrap();
 
-    let vertex_data: [f32; 24] = [
-        0.0, 0.0, 1.0, 1.0, 200.0, 0.0, 1.0, 1.0, 0.0, 200.0, 1.0, 1.0, // Triangle 1
-        200.0, 0.0, 1.0, 1.0, 0.0, 200.0, 1.0, 1.0, 200.0, 200.0, 1.0, 1.0, // Triangle 2
-    ];
+    let vertex_data = gen_vertex_data();
 
-
-    let mut form1 = Form::init(&context, &vertex_data, &program).unwrap();
+    let mut form1 = Form::init(&context, vertex_data.as_ref(), &program).unwrap();
     let draw_props1 = DrawProps {
-        position: XYTuple { x: 0.0, y: 0.0 },
+        position: XYTuple { x: 100.0, y: 100.0 },
         rotation: 0.0,
         scale: XYTuple { x: 1.0, y: 1.0 },
         color: [0.7, 0.33, 0.1, 1.0],
     };
 
-    let mut form2 = Form::init(&context, &vertex_data, &program).unwrap();
+    let mut form2 = Form::init(&context, vertex_data.as_ref(), &program).unwrap();
     let draw_props2 = DrawProps {
-        position: XYTuple { x: 300.0, y: 50.0 },
+        position: XYTuple { x: 400.0, y: 400.0 },
         rotation: std::f32::consts::PI / 4.0,
         scale: XYTuple { x: 1.5, y: 1.0 },
         color: [0.0, 0.33, 0.1, 1.0],
     };
 
-    form1.prepare([800.0, 400.0, 1.0, 1.0], &draw_props1);
-    form2.prepare([800.0, 400.0, 1.0, 1.0], &draw_props2);
+    form1.prepare([800.0, 800.0, 1.0, 1.0], &draw_props1);
+    form2.prepare([800.0, 800.0, 1.0, 1.0], &draw_props2);
 
     context.clear_color(0.0, 0.0, 0.0, 0.0);
     context.clear(WebGlRenderingContext::COLOR_BUFFER_BIT | WebGlRenderingContext::DEPTH_BUFFER_BIT);

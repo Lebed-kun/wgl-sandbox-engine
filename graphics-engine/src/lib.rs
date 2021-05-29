@@ -3,6 +3,7 @@ use wasm_bindgen::prelude::*;
 mod types;
 #[macro_use]
 mod utils;
+mod constants;
 pub mod program;
 pub mod form;
 pub mod shape;

@@ -6,6 +6,7 @@ use web_sys::{
 use js_sys::{Float32Array};
 use crate::types::{Vector4, Matrix4x4, DrawProps};
 use crate::program::{Program};
+use crate::constants;
 
 struct Uniforms {
     pub viewport: Vector4,
@@ -13,20 +14,6 @@ struct Uniforms {
     pub rotation: Matrix4x4,
     pub scale: Matrix4x4,
     pub color: Vector4,
-}
-
-mod constants {
-    use super::{Matrix4x4, Vector4};
-
-    pub const default_matrix4x4: Matrix4x4 = [
-        1.0, 0.0, 0.0, 0.0,
-        0.0, 1.0, 0.0, 0.0,
-        0.0, 0.0, 1.0, 0.0,
-        0.0, 0.0, 0.0, 1.0,
-    ];
-    pub const default_vector4: Vector4 = [0.0, 0.0, 0.0, 0.0];
-
-    pub const vertex_size: i32 = 4;
 }
 
 // TODO: profile memory size for call stack optimization (?)

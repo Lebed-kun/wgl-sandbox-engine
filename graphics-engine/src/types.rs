@@ -1,14 +1,16 @@
-pub type Vector4 = [f32; 4];
-pub type Matrix4x4 = [f32; 4 * 4];
+// TODO: replace 'f32's with this alias
+pub type Float = f32;
+pub type Vector4 = [Float; 4];
+pub type Matrix4x4 = [Float; 4 * 4];
 
 pub struct XYTuple {
-    pub x: f32,
-    pub y: f32
+    pub x: Float,
+    pub y: Float
 }
 
 pub struct DrawProps {
     pub position: XYTuple,
-    pub rotation: f32,
+    pub rotation: Float,
     pub scale: XYTuple,
     pub color: Vector4,
 }

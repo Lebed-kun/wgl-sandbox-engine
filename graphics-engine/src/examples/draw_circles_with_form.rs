@@ -42,8 +42,6 @@ const example_fragment_shader: &'static str = "
 ";
 
 fn gen_vertex_data() -> Box<[f32]> {
-    const max_viewport_size: f32 = 800.0;
-    const min_viewport_size: f32 = 800.0;
     let origin = XYTuple {
         x: 0.0,
         y: 0.0,
